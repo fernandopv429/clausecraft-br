@@ -161,7 +161,9 @@ def criar_vectorstore(recriar: bool = False, colecao: str | None = None):
         collection_name=colecao,
         embedding_length=dimensao_embedding(),
         use_jsonb=True,
-        create_extension=True,
+        # exige privilégio no banco; desligue se o usuário do deploy não for superusuário
+        # e a extensão já estiver instalada
+        create_extension=os.getenv("PGVECTOR_CREATE_EXTENSION", "true").lower() == "true",
         pre_delete_collection=recriar,
     )
     return _VECTORSTORES[colecao]

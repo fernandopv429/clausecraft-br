@@ -58,23 +58,52 @@ st.markdown(
 )
 
 @st.cache_resource(show_spinner=False)
-def _verificar_base() -> str:
-    """Confere se a coleção pgvector responde antes de liberar o formulário."""
+def _verificar_base() -> tuple[str, str]:
+    """Confere se a coleção pgvector responde. Devolve (diagnóstico, detalhe técnico)."""
     if not URL_POSTGRES:
-        return "POSTGRES_URL não configurada no arquivo .env."
+        return ("POSTGRES_URL não configurada.", "")
     try:
         criar_vectorstore().similarity_search("furto", k=1)
-    except Exception as erro:  # conexão, extensão ausente ou coleção vazia
-        return str(erro)
-    return ""
+    except Exception as erro:
+        detalhe = str(erro)
+        baixo = detalhe.lower()
+
+        # o host não resolve: app e banco não estão na mesma rede do Docker
+        falhas_dns = (
+            "name resolution",          # Temporary failure in name resolution (Errno -3)
+            "name or service not known",  # Errno -2
+            "failed to resolve host",
+            "could not translate host",
+        )
+        if any(marca in baixo for marca in falhas_dns):
+            hospedeiro = URL_POSTGRES.split("@")[-1].split("/")[0]
+            return (
+                f"O host `{hospedeiro}` não foi encontrado pela rede.\n\n"
+                "Se for um nome interno do Coolify, o container do app precisa estar na mesma "
+                "rede do banco — ative *Connect To Predefined Network* e use a porta interna "
+                "(5432). Ou troque para o endereço público do PostgreSQL.",
+                detalhe,
+            )
+        if "connection refused" in baixo or "timeout" in baixo:
+            return ("O PostgreSQL não respondeu: porta fechada, serviço parado ou firewall.", detalhe)
+        if "password authentication" in baixo or "authentication failed" in baixo:
+            return ("Usuário ou senha do PostgreSQL incorretos.", detalhe)
+        if "does not exist" in baixo or "undefined" in baixo:
+            return (
+                "A conexão funcionou, mas a base não tem os dados. "
+                "Rode `python construir_vectordb.py` apontando para este banco.",
+                detalhe,
+            )
+        return ("Falha ao consultar a base.", detalhe)
+    return ("", "")
 
 
-falha = _verificar_base()
+falha, detalhe = _verificar_base()
 if falha:
-    st.error(
-        f"Não foi possível consultar a base do Código Penal (coleção `{NOME_COLECAO}`): {falha}\n\n"
-        "Verifique a `POSTGRES_URL` no `.env` e rode `python construir_vectordb.py`."
-    )
+    st.error(f"Não foi possível consultar a coleção `{NOME_COLECAO}`.\n\n{falha}")
+    if detalhe:
+        with st.expander("Detalhe técnico"):
+            st.code(detalhe)
 
 with st.sidebar:
     st.subheader("Configuração")

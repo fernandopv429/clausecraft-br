@@ -71,7 +71,29 @@ Para ingerir uma CCT nova, rode na sua máquina — o container passa a enxergar
 O `ingerir_ccts.py` deste repositório está travado justamente para impedir escrita acidental na
 base compartilhada.
 
-## 6. Depois de subir
+## 6. Rede entre o app e o banco
+
+Se o PostgreSQL é um recurso do próprio Coolify, a string de conexão que ele mostra usa um
+**hostname interno** (algo como `i2jzpjs8bbw3gbl1c80fyzd7`). Esse nome só resolve dentro da rede
+Docker do banco — o container do app precisa estar nela:
+
+1. nas configurações avançadas do recurso do app, ative **Connect To Predefined Network**;
+2. na `POSTGRES_URL`, use a **porta interna 5432**, não a porta publicada para fora.
+
+```
+postgres://postgres:SENHA@i2jzpjs8bbw3gbl1c80fyzd7:5432/postgres
+```
+
+Sem isso o app sobe e falha na primeira consulta com
+`failed to resolve host ... Temporary failure in name resolution`.
+
+A alternativa é usar o endereço público (`72.60.61.18:5435`), que funciona de imediato mas mantém
+a porta do banco exposta na internet.
+
+Se o usuário do banco não for superusuário, defina `PGVECTOR_CREATE_EXTENSION=false` — o app
+deixa de tentar `CREATE EXTENSION vector` a cada subida, o que exige privilégio.
+
+## 7. Depois de subir
 
 1. Abra a URL e confirme que a trava de senha aparece.
 2. Rode um caso de teste; a barra lateral deve mostrar o modelo e a coleção em uso.
