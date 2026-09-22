@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "juscraper": {
+      "type": "http",
+      "url": "https://juscraper.nexusdevhub.com/mcp"
+    }
+  }
+}

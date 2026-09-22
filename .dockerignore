@@ -1,0 +1,18 @@
+# segredos nunca entram na imagem — as variáveis vêm do painel de deploy
+.env
+.env.*
+
+# dependências locais desta máquina (o container instala pelo requirements)
+.pylibs/
+__pycache__/
+*.pyc
+
+# PDFs das CCTs: 16 MB usados só na ingestão, que é tarefa administrativa local.
+# Os dados já estão no PostgreSQL; a imagem não precisa deles.
+dados/ccts/
+
+# artefatos locais
+vectordb/
+exemplos/
+*.docx.bak
+.git/

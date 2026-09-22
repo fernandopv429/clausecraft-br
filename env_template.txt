@@ -1,0 +1,33 @@
+# Copie este arquivo para .env e preencha as chaves.
+
+# LLM (obrigatório) — chave da OpenAI
+OPENAI_API_KEY=sua_chave_openai_aqui
+LLM_MODEL=openai/gpt-4o
+
+# Busca de jurisprudência (obrigatório para o agente de jurisprudência)
+TAVILY_API_KEY=sua_chave_tavily_aqui
+
+# Embeddings: "openai" (padrão) ou "huggingface" (roda local, sem custo de API)
+EMBEDDING_PROVIDER=openai
+EMBEDDING_MODEL=text-embedding-3-small
+# EMBEDDING_MODEL_HF=sentence-transformers/paraphrase-multilingual-mpnet-base-v2
+
+# Banco vetorial: PostgreSQL com a extensão pgvector (obrigatório)
+POSTGRES_URL=postgresql://usuario:senha@host:5432/banco
+
+# Base legal e coleção (os padrões já funcionam)
+# CODIGO_PENAL_JSON_PATH=dados/codigo_penal.json
+# COLLECTION_NAME=legislacao
+# COLLECTION_PECAS=pecas_modelo
+# PASTA_PECAS=/caminho/para/os/docx/originais
+# TOP_K=5
+# EMBEDDING_DIM=1536
+
+# Fontes brasileiras de jurisprudência (separadas por vírgula)
+# FONTES_JURISPRUDENCIA=stf.jus.br,stj.jus.br,jusbrasil.com.br,cnj.jus.br
+
+# MCP de jurisprudência (TJs, TRF3/TRF5, Datajud e Comunica CNJ)
+# MCP_JUSCRAPER_URL=https://juscraper.nexusdevhub.com/mcp
+
+# Trava de acesso do app publicado (vazio = aberto)
+APP_SENHA=

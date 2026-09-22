@@ -1,0 +1,19 @@
+# Compose para o Coolify. O PostgreSQL é externo (pgvector já provisionado),
+# então o serviço é stateless: pode escalar e reiniciar sem perder nada.
+services:
+  clausecraft:
+    build: .
+    ports:
+      - "8501:8501"
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:?defina no painel}
+      POSTGRES_URL: ${POSTGRES_URL:?defina no painel}
+      LLM_MODEL: ${LLM_MODEL:-openai/gpt-4o}
+      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-openai}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-3-small}
+      COLLECTION_NAME: ${COLLECTION_NAME:-legislacao}
+      COLLECTION_PECAS: ${COLLECTION_PECAS:-pecas_modelo}
+      MCP_JUSCRAPER_URL: ${MCP_JUSCRAPER_URL:-https://juscraper.nexusdevhub.com/mcp}
+      TAVILY_API_KEY: ${TAVILY_API_KEY:-}
+      APP_SENHA: ${APP_SENHA:?defina uma senha ou deixe vazio conscientemente}
+    restart: unless-stopped
