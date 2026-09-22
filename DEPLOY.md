@@ -10,8 +10,8 @@ No painel do Coolify, em *Environment Variables*:
 | Variável | Obrigatória | Valor |
 |---|---|---|
 | `OPENAI_API_KEY` | sim | chave da OpenAI |
-| `POSTGRES_URL` | sim | banco do ClauseCraft — coleções `legislacao` e `pecas_modelo` (porta 5455) |
-| `CCT_POSTGRES_URL` | sim | banco das convenções, do Agente 1.0 — **somente leitura** (porta 5435) |
+| `POSTGRES_URL` | sim | PostgreSQL com pgvector (porta 5435) — legislação, modelos e convenções |
+| `CCT_POSTGRES_URL` | não | só se as convenções forem para outro servidor |
 | `APP_SENHA` | **recomendada** | senha de acesso ao app |
 | `LLM_MODEL` | não | `openai/gpt-4o` (padrão) |
 | `EMBEDDING_MODEL` | não | `text-embedding-3-small` (padrão) |
@@ -34,17 +34,17 @@ Sem `APP_SENHA` o app sobe **aberto**: qualquer pessoa com a URL gera peças na 
 Se o Coolify roda no mesmo servidor do PostgreSQL, prefira o host interno na `POSTGRES_URL`
 em vez do IP público: o tráfego não sai da máquina e a porta 5455 não precisa ficar exposta.
 
-São **dois bancos**, de propósito:
+Um banco só, na porta 5435:
 
-| Banco | Conteúdo | Acesso |
+| Tabela / coleção | Conteúdo | Quem mantém |
 |---|---|---|
-| `POSTGRES_URL` (5455) | `legislacao` (1.259 artigos) e `pecas_modelo` (133 capítulos) | leitura e escrita |
-| `CCT_POSTGRES_URL` (5435) | `cct_documentos` e `cct_chunks` — 37 convenções, 3.060 cláusulas | **somente leitura** |
+| coleção `legislacao` | 1.259 artigos do Código Penal e da CLT | ClauseCraft |
+| coleção `pecas_modelo` | 133 capítulos anonimizados | ClauseCraft |
+| `cct_documentos` / `cct_chunks` | 37 convenções, 3.060 cláusulas, desde 2019 | pipeline do Agente 1.0 |
 
-A base de convenções é mantida pelo pipeline do Agente 1.0 e cobre desde 2019, com as regionais
-de asseio. O ClauseCraft consome sem escrever: dois ingestores com schemas diferentes gravando na
-mesma tabela seria fonte garantida de divergência. Para acrescentar uma CCT, use a ingestão daquele
-projeto — o ClauseCraft passa a enxergar na hora.
+As convenções são **lidas, nunca escritas** por este projeto: dois ingestores com schemas
+diferentes gravando na mesma tabela seria fonte garantida de divergência. Para acrescentar uma CCT,
+use a ingestão do Agente 1.0 — o ClauseCraft passa a enxergar na hora.
 
 ## 4. Arquitetura de configuração
 

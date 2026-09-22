@@ -34,9 +34,9 @@ def _normalizar_url(url: str) -> str:
 
 URL_POSTGRES = _normalizar_url(URL_POSTGRES_BRUTA)
 
-# A base de CCTs é de outro projeto (Agente 1.0) e o ClauseCraft só lê dela.
-# Conexão separada justamente para não escrever no banco alheio: as coleções de
-# legislação e de modelos ficam no banco próprio, apontado por POSTGRES_URL.
+# As convenções vivem nas tabelas cct_documentos/cct_chunks, mantidas pelo pipeline do
+# Agente 1.0 — o ClauseCraft só lê delas. Hoje ficam no mesmo banco das coleções, então
+# esta variável é opcional; existe para o caso de a base de CCTs mudar de servidor.
 URL_POSTGRES_CCT_BRUTA = os.getenv("CCT_POSTGRES_URL") or URL_POSTGRES_BRUTA
 
 NOME_COLECAO = os.getenv("COLLECTION_NAME", "legislacao")
@@ -90,8 +90,7 @@ DIMENSOES_CONHECIDAS = {
 # Variáveis sem as quais o app não funciona. Conferidas na subida, não no meio de uma análise.
 OBRIGATORIAS = {
     "OPENAI_API_KEY": "chave da OpenAI usada pelos agentes e pelos embeddings",
-    "POSTGRES_URL": "banco do ClauseCraft: coleções de legislação e de modelos de peça",
-    "CCT_POSTGRES_URL": "banco das convenções coletivas (somente leitura)",
+    "POSTGRES_URL": "PostgreSQL com pgvector: legislação, modelos de peça e convenções",
 }
 
 
