@@ -13,7 +13,10 @@ EMBEDDING_MODEL=text-embedding-3-small
 # EMBEDDING_MODEL_HF=sentence-transformers/paraphrase-multilingual-mpnet-base-v2
 
 # Banco vetorial: PostgreSQL com a extensão pgvector (obrigatório)
-POSTGRES_URL=postgresql://usuario:senha@host:5432/banco
+POSTGRES_URL=postgresql://usuario:senha@host:5455/banco
+
+# Banco das convenções coletivas (somente leitura; mantido pelo pipeline do Agente 1.0)
+CCT_POSTGRES_URL=postgresql://usuario:senha@host:5435/banco
 
 # Base legal e coleção (os padrões já funcionam)
 # CODIGO_PENAL_JSON_PATH=dados/codigo_penal.json

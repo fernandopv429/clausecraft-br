@@ -10,7 +10,8 @@ No painel do Coolify, em *Environment Variables*:
 | Variável | Obrigatória | Valor |
 |---|---|---|
 | `OPENAI_API_KEY` | sim | chave da OpenAI |
-| `POSTGRES_URL` | sim | `postgresql://usuario:senha@host:5432/banco` |
+| `POSTGRES_URL` | sim | banco do ClauseCraft — coleções `legislacao` e `pecas_modelo` (porta 5455) |
+| `CCT_POSTGRES_URL` | sim | banco das convenções, do Agente 1.0 — **somente leitura** (porta 5435) |
 | `APP_SENHA` | **recomendada** | senha de acesso ao app |
 | `LLM_MODEL` | não | `openai/gpt-4o` (padrão) |
 | `EMBEDDING_MODEL` | não | `text-embedding-3-small` (padrão) |
@@ -33,11 +34,17 @@ Sem `APP_SENHA` o app sobe **aberto**: qualquer pessoa com a URL gera peças na 
 Se o Coolify roda no mesmo servidor do PostgreSQL, prefira o host interno na `POSTGRES_URL`
 em vez do IP público: o tráfego não sai da máquina e a porta 5455 não precisa ficar exposta.
 
-O banco já contém:
+São **dois bancos**, de propósito:
 
-- coleção `legislacao` — 1.259 artigos (Código Penal e CLT)
-- coleção `pecas_modelo` — 133 capítulos anonimizados
-- tabelas `cct_documentos` e `cct_chunks` — 18 convenções, 1.346 cláusulas
+| Banco | Conteúdo | Acesso |
+|---|---|---|
+| `POSTGRES_URL` (5455) | `legislacao` (1.259 artigos) e `pecas_modelo` (133 capítulos) | leitura e escrita |
+| `CCT_POSTGRES_URL` (5435) | `cct_documentos` e `cct_chunks` — 37 convenções, 3.060 cláusulas | **somente leitura** |
+
+A base de convenções é mantida pelo pipeline do Agente 1.0 e cobre desde 2019, com as regionais
+de asseio. O ClauseCraft consome sem escrever: dois ingestores com schemas diferentes gravando na
+mesma tabela seria fonte garantida de divergência. Para acrescentar uma CCT, use a ingestão daquele
+projeto — o ClauseCraft passa a enxergar na hora.
 
 ## 4. Arquitetura de configuração
 
@@ -61,9 +68,8 @@ dois `.docx` de timbre. Ficam de fora, tanto do Git quanto da imagem:
 
 Para ingerir uma CCT nova, rode na sua máquina — o container passa a enxergar pelo banco:
 
-```bash
-python ingerir_ccts.py
-```
+O `ingerir_ccts.py` deste repositório está travado justamente para impedir escrita acidental na
+base compartilhada.
 
 ## 6. Depois de subir
 

@@ -228,6 +228,13 @@ def atualizar_metadados():
 
 
 def ingerir(refazer: bool = False):
+    raise SystemExit(
+        "❌ A base de CCTs é mantida pelo pipeline do Agente 1.0 (tabelas cct_documentos/cct_chunks).\n"
+        "   Ingerir por aqui criaria um segundo gravador com schema diferente na mesma base.\n"
+        "   Para acrescentar uma convenção, use a ingestão daquele projeto.\n"
+        "   Se quiser mesmo uma base própria, aponte POSTGRES_URL para outro banco e "
+        "remova esta trava."
+    )
     criar_schema()
 
     if refazer:

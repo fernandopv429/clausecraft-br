@@ -1,9 +1,13 @@
 # cct_store.py
-"""Armazenamento das Convenções Coletivas de Trabalho no PostgreSQL + pgvector.
+"""Consulta às Convenções Coletivas de Trabalho no PostgreSQL + pgvector.
 
 As CCTs não ficam na mesma coleção da legislação porque a consulta é diferente:
 buscar cláusula de CCT é *filtrar* (sindicato, data de vigência, município) e só
 depois ordenar por similaridade. Por isso vigência é coluna DATE, não metadado solto.
+
+As tabelas `cct_documentos` e `cct_chunks` são **mantidas pelo pipeline do Agente 1.0**;
+aqui elas são somente leitura. Ingerir uma convenção nova é tarefa daquele projeto —
+assim não existem dois ingestores com schemas diferentes gravando na mesma base.
 """
 
 import re
@@ -12,7 +16,7 @@ from datetime import date
 
 import psycopg
 
-from config import URL_POSTGRES_BRUTA, criar_embeddings, dimensao_embedding
+from config import URL_POSTGRES_CCT_BRUTA, criar_embeddings, dimensao_embedding
 
 SCHEMA = """
 CREATE EXTENSION IF NOT EXISTS vector;
@@ -52,7 +56,8 @@ CREATE INDEX IF NOT EXISTS idx_cct_doc_vigencia ON cct_documentos (categoria, vi
 
 
 def conectar():
-    return psycopg.connect(URL_POSTGRES_BRUTA, connect_timeout=30)
+    """Conexão com a base de convenções — do Agente 1.0, usada só para leitura."""
+    return psycopg.connect(URL_POSTGRES_CCT_BRUTA, connect_timeout=30)
 
 
 def criar_schema():
@@ -80,8 +85,8 @@ def normalizar(texto: str) -> str:
 # escolheria a convenção pelo cargo e citaria cláusula de convenção que não rege o contrato.
 RAMOS_COBERTOS = [
     ("vigilancia", r"vigil[âa]nc|seguran[çc]a patrimonial|transporte de valores|escolta armada|segurança privada"),
-    ("asseio", r"asseio|conserva[çc][ãa]o|limpeza|higieniza[çc][ãa]o|facilities|zeladoria"),
-    ("porteiros", r"presta[çc][ãa]o de servi[çc]os a terceiros|terceiriza|portaria|m[ãa]o de obra tempor[áa]ria"),
+    ("asseio_conservacao", r"asseio|conserva[çc][ãa]o|limpeza|higieniza[çc][ãa]o|facilities|zeladoria"),
+    ("terceirizados", r"presta[çc][ãa]o de servi[çc]os a terceiros|terceiriza|portaria|m[ãa]o de obra tempor[áa]ria"),
 ]
 
 
@@ -192,7 +197,8 @@ def buscar_clausulas(
     with conectar() as conexao, conexao.cursor() as cursor:
         cursor.execute(
             f"""
-            SELECT d.categoria, d.titulo, d.registro_mte, d.vigencia_inicio, d.vigencia_fim,
+            SELECT d.categoria, d.titulo, d.numero_registro_mte AS registro_mte,
+                   d.vigencia_inicio, d.vigencia_fim,
                    c.clausula_ref, c.clausula_titulo, c.conteudo,
                    1 - (c.embedding <=> %(vetor)s::vector) AS similaridade
             FROM cct_chunks c

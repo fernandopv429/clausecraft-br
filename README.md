@@ -50,9 +50,10 @@ coleção `pecas_modelo`. O redator trabalhista consulta esses capítulos para s
 casa — os modelos dão a forma, o caso dá o conteúdo. Os `.docx` originais **não entram no
 repositório**: ficam na pasta apontada por `PASTA_PECAS` e só a versão mascarada é gravada.
 
-**Convenções Coletivas:** 18 CCTs e termos aditivos (SESVESP/vigilância, SIEMACO/asseio,
-SINDEEPRES/porteiros, de 2020 a 2026/27) em `dados/ccts/`, quebradas por cláusula nas tabelas
-`cct_documentos` e `cct_chunks`. A busca filtra por categoria e por **data de vigência** antes de
+**Convenções Coletivas:** 37 convenções e termos aditivos (SEEVISSP/SESVESP na vigilância,
+SIEMACO-SP/SEAC-SP no asseio e SINDEEPRES nos terceirizados, de 2019 a 2026/27), totalizando
+3.060 cláusulas. A base é mantida pelo pipeline do Agente 1.0 e consumida **somente em leitura**,
+por uma conexão própria (`CCT_POSTGRES_URL`). A busca filtra por categoria e por **data de vigência** antes de
 ordenar por similaridade — perguntar "qual o adicional de hora extra" com a data da rescisão devolve
 a cláusula da convenção que estava em vigor naquela data, não a mais recente.
 
@@ -234,7 +235,8 @@ reclamação trabalhista seria citar tribunal sem competência para a matéria.
 | `TAVILY_API_KEY` | — | Busca web, usada na jurisprudência trabalhista |
 | `EMBEDDING_PROVIDER` | `openai` | `openai` ou `huggingface` (local, sem custo de API) |
 | `EMBEDDING_MODEL` | `text-embedding-3-small` | Modelo de embedding |
-| `POSTGRES_URL` | — | Conexão do PostgreSQL com pgvector (obrigatória) |
+| `POSTGRES_URL` | — | Banco do ClauseCraft: legislação e modelos (obrigatória) |
+| `CCT_POSTGRES_URL` | igual a `POSTGRES_URL` | Banco das convenções, somente leitura |
 | `COLLECTION_NAME` | `legislacao` | Coleção da legislação |
 | `COLLECTION_PECAS` | `pecas_modelo` | Coleção dos modelos de peça |
 | `PASTA_PECAS` | `~/Área de trabalho/enterevista e petição` | Onde estão os `.docx` originais |
